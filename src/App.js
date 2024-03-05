@@ -1,4 +1,4 @@
-import FileList from './components/FileList';
+import FileList from './components/file-list/FileList';
 import './App.css';
 
 function App() {
