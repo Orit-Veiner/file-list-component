@@ -3,7 +3,7 @@ import "./FileList.css";
 import { files as initialFiles } from "./filesData.js";
 
 function FileList() {
-  const [files, setFiles] = useState(initialFiles); //initialFiles are from the input file, containing the files list data
+  const [files, setFiles] = useState(initialFiles || []); //initialFiles are from the input file, containing the files list data
   const [selectedFiles, setSelectedFiles] = useState({});
   const selectAllRef = useRef(null);
 
@@ -39,14 +39,13 @@ function FileList() {
     const selectedFilesInfo = files
       .filter((file, index) => selectedFiles[index])
       .map((file) => `Path: ${file.path}\nDevice: ${file.device}`);
-  
+
     if (selectedFilesInfo.length === 0) {
       alert("No files were selected...");
     } else {
       alert(`Downloading files:\n\n${selectedFilesInfo.join("\n\n")}`);
     }
   };
-  
 
   useEffect(() => {
     const totalAvailableFiles = files.filter(
@@ -116,17 +115,21 @@ function FileList() {
                   disabled={file.status !== "available"}
                 />
               </td>
-              <td>{file.name}</td>
-              <td>{file.device}</td>
-              <td>{file.path}</td>
+              <td>{file.name || "N/A"}</td>
+              <td>{file.device || "N/A"}</td>
+              <td>{file.path || "N/A"}</td>
               <td
                 className={
-                  file.status === "available"
-                    ? "status-available"
-                    : "status-no-logo"
+                  file.status
+                    ? file.status === "available"
+                      ? "status-available"
+                      : "status-no-logo"
+                    : ""
                 }
               >
-                {capitalizeFirstLetter(file.status)}
+                {file.status
+                  ? capitalizeFirstLetter(file.status)
+                  : "N/A"}
               </td>
             </tr>
           ))}
