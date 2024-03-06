@@ -50,3 +50,18 @@ table {
 tr {
     border-bottom: 1px solid #cccccc;
 }
+
+/* Text too long to display */
+td {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+td:hover {
+    overflow: visible;
+    white-space: normal;
+    position: absolute;
+    z-index: 1;
+    max-width: none;
+}

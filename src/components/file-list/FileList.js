@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./FileList.css";
 import { files as initialFiles } from "./filesData.js";
 
 function FileList() {
   const [files, setFiles] = useState(initialFiles); //initialFiles are from the input file, containing the files list data
   const [selectedFiles, setSelectedFiles] = useState({});
+  const selectAllRef = useRef(null);
 
   const toggleFileSelection = (index) => {
     setSelectedFiles((prevSelected) => {
-      const newSelection = { ...prevSelected }; 
-      // Exists in selected -> deselect it     
+      const newSelection = { ...prevSelected };
+      // Exists in selected -> deselect it
       if (newSelection[index]) {
-        delete newSelection[index]; 
-      // Add a newly selected
+        delete newSelection[index];
+        // Add a newly selected
       } else {
         newSelection[index] = true;
       }
@@ -33,14 +34,32 @@ function FileList() {
       setSelectedFiles({}); // Clear all selections
     }
   };
-  
 
   const handleDownloadSelected = () => {
     const selectedFilesInfo = files
       .filter((file, index) => selectedFiles[index])
       .map((file) => `Path: ${file.path}\nDevice: ${file.device}`);
-    alert(`Downloading files:\n\n${selectedFilesInfo.join("\n\n")}`);
+  
+    if (selectedFilesInfo.length === 0) {
+      alert("No files were selected...");
+    } else {
+      alert(`Downloading files:\n\n${selectedFilesInfo.join("\n\n")}`);
+    }
   };
+  
+
+  useEffect(() => {
+    const totalAvailableFiles = files.filter(
+      (file) => file.status === "available"
+    ).length;
+    const totalSelectedFiles = Object.keys(selectedFiles).length;
+    const isSelected = totalSelectedFiles > 0;
+    const isAllSelected = totalSelectedFiles === totalAvailableFiles;
+
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = isSelected && !isAllSelected;
+    }
+  }, [selectedFiles, files]);
 
   return (
     <div>
@@ -48,15 +67,12 @@ function FileList() {
         <input
           type="checkbox"
           id="selectAll"
+          ref={selectAllRef}
           onChange={handleSelectAll}
           checked={
-            Object.keys(selectedFiles).length ===
-              files.filter((file) => file.status === "available").length &&
-            files.filter((file) => file.status === "available").length > 0
-          }
-          indeterminate={
             Object.keys(selectedFiles).length > 0 &&
-            Object.keys(selectedFiles).length < files.length
+            Object.keys(selectedFiles).length ===
+              files.filter((file) => file.status === "available").length
           }
         />
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
