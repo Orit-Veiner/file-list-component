@@ -1,23 +1,52 @@
 /* Allign statuses by leaving room for logos before */
-.status-available::before, .status-no-logo::before {
+.status-available::before,
+.status-no-logo::before {
     content: '';
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 15px;
+    height: 15px;
     margin-right: 5px;
-  }
+}
 
-  /* Avaliable status logo */
-  .status-available::before {    
+/* Avaliable status logo */
+.status-available::before {
     background-color: green;
     border-radius: 50%;
-  }
+}
 
 tbody tr:hover {
     background-color: #f8f8f8;
-  }
-  
+}
+
 tr.selected {
     background-color: #ebebeb;
-  }
-  
+}
+
+/* Pad the table */
+td,
+th {
+    padding: 8px;
+}
+
+th {
+    text-align: left;
+}
+
+.download-selected:hover {
+    cursor: pointer;
+}
+
+/* Controllers above the table */
+.table-controls {
+    padding: 10px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #cccccc;
+}
+
+tr {
+    border-bottom: 1px solid #cccccc;
+}
