@@ -107,11 +107,7 @@ function FileList() {
               <td>
                 <input
                   type="checkbox"
-                  checked={!!selectedFiles[index]}
-                  onChange={(e) => {
-                    // e.stopPropagation();
-                    // toggleFileSelection(index);
-                  }}
+                  checked={!!selectedFiles[index]}                  
                   disabled={file.status !== "available"}
                 />
               </td>
