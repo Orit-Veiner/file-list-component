@@ -1,19 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./FileList.css";
-import { files as initialFiles } from "./filesData.js";
+import { files as initialFiles } from "./filesData";
+import Table from "./Table";
+import Controls from "./Controls";
 
 function FileList() {
-  const [files, setFiles] = useState(initialFiles || []); //initialFiles are from the input file, containing the files list data
+  const [files, setFiles] = useState(initialFiles || []);
   const [selectedFiles, setSelectedFiles] = useState({});
   const selectAllRef = useRef(null);
 
+  useEffect(() => {
+    const totalFilesSelectable = files.filter(file => file.status === "available").length;
+    const totalSelectedFiles = Object.keys(selectedFiles).filter(key => selectedFiles[key]).length;
+
+    if (selectAllRef.current) {
+      selectAllRef.current.checked = totalSelectedFiles === totalFilesSelectable && totalFilesSelectable !== 0;
+      selectAllRef.current.indeterminate = totalSelectedFiles > 0 && totalSelectedFiles < totalFilesSelectable;
+    }
+  }, [selectedFiles, files]);
+
   const toggleFileSelection = (index) => {
-    setSelectedFiles((prevSelected) => {
+    setSelectedFiles(prevSelected => {
       const newSelection = { ...prevSelected };
-      // Exists in selected -> deselect it
       if (newSelection[index]) {
         delete newSelection[index];
-        // Add a newly selected
       } else {
         newSelection[index] = true;
       }
@@ -22,23 +32,32 @@ function FileList() {
   };
 
   const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      const newSelectedFiles = {};
+    const isChecked = event.target.checked;
+    const newSelectedFiles = {};
+
+    if (isChecked) {
       files.forEach((file, index) => {
         if (file.status === "available") {
           newSelectedFiles[index] = true;
         }
       });
-      setSelectedFiles(newSelectedFiles);
     } else {
-      setSelectedFiles({}); // Clear all selections
+      // If deselecting, clear all selections
+      files.forEach((file, index) => {
+        if (file.status === "available") {
+          if (newSelectedFiles[index]) {
+            delete newSelectedFiles[index];
+          }
+        }
+      });
     }
+    setSelectedFiles(newSelectedFiles);
   };
 
   const handleDownloadSelected = () => {
     const selectedFilesInfo = files
       .filter((file, index) => selectedFiles[index])
-      .map((file) => `Path: ${file.path}\nDevice: ${file.device}`);
+      .map((file) => `Path: ${file.path}, Device: ${file.device}`);
 
     if (selectedFilesInfo.length === 0) {
       alert("No files were selected...");
@@ -47,98 +66,21 @@ function FileList() {
     }
   };
 
-  useEffect(() => {
-    const totalAvailableFiles = files.filter(
-      (file) => file.status === "available"
-    ).length;
-    const totalSelectedFiles = Object.keys(selectedFiles).length;
-    const isSelected = totalSelectedFiles > 0;
-    const isAllSelected = totalSelectedFiles === totalAvailableFiles;
-
-    if (selectAllRef.current) {
-      selectAllRef.current.indeterminate = isSelected && !isAllSelected;
-    }
-  }, [selectedFiles, files]);
-
   return (
     <div>
-      <div className="table-controls">
-        <input
-          type="checkbox"
-          id="selectAll"
-          ref={selectAllRef}
-          onChange={handleSelectAll}
-          checked={
-            Object.keys(selectedFiles).length > 0 &&
-            Object.keys(selectedFiles).length ===
-              files.filter((file) => file.status === "available").length
-          }
-        />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <span>
-          {Object.keys(selectedFiles).length > 0
-            ? `Selected ${Object.keys(selectedFiles).length}`
-            : "None Selected"}
-        </span>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <span className="download-selected" onClick={handleDownloadSelected}>
-          &#x1F873; Download Selected
-        </span>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Name</th>
-            <th>Device</th>
-            <th>Path</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {files.map((file, index) => (
-            <tr
-              key={index}
-              className={selectedFiles[index] ? "selected" : ""}
-              onClick={() => toggleFileSelection(index)}
-            >
-              <td>
-                <input
-                  type="checkbox"
-                  checked={!!selectedFiles[index]}                  
-                  disabled={file.status !== "available"}
-                />
-              </td>
-              <td>{file.name || "N/A"}</td>
-              <td>{file.device || "N/A"}</td>
-              <td>{file.path || "N/A"}</td>
-              <td
-                className={
-                  file.status
-                    ? file.status === "available"
-                      ? "status-available"
-                      : "status-no-logo"
-                    : ""
-                }
-              >
-                {file.status
-                  ? capitalizeFirstLetter(file.status)
-                  : "N/A"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Controls
+        selectAllRef={selectAllRef}
+        handleSelectAll={handleSelectAll}
+        selectedFilesCount={Object.keys(selectedFiles).filter(key => selectedFiles[key]).length}
+        handleDownloadSelected={handleDownloadSelected}
+      />
+      <Table
+        files={files}
+        selectedFiles={selectedFiles}
+        toggleFileSelection={toggleFileSelection}
+      />
     </div>
   );
-}
-
-// Return string with first letter capitalized
-function capitalizeFirstLetter(input) {
-  if (typeof input !== "string" || input.length === 0) return input;
-  return input.charAt(0).toUpperCase() + input.slice(1);
 }
 
 export default FileList;
