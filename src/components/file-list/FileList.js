@@ -7,23 +7,33 @@ function FileList() {
   const [selectedFiles, setSelectedFiles] = useState({});
 
   const toggleFileSelection = (index) => {
-    setSelectedFiles((prevSelected) => ({
-      ...prevSelected,
-      [index]: !prevSelected[index],
-    }));
+    setSelectedFiles((prevSelected) => {
+      const newSelection = { ...prevSelected }; 
+      // Exists in selected -> deselect it     
+      if (newSelection[index]) {
+        delete newSelection[index]; 
+      // Add a newly selected
+      } else {
+        newSelection[index] = true;
+      }
+      return newSelection;
+    });
   };
 
   const handleSelectAll = (event) => {
-    const newSelectedFiles = {};
     if (event.target.checked) {
+      const newSelectedFiles = {};
       files.forEach((file, index) => {
         if (file.status === "available") {
           newSelectedFiles[index] = true;
         }
       });
+      setSelectedFiles(newSelectedFiles);
+    } else {
+      setSelectedFiles({}); // Clear all selections
     }
-    setSelectedFiles(newSelectedFiles);
   };
+  
 
   const handleDownloadSelected = () => {
     const selectedFilesInfo = files
