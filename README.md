@@ -24,5 +24,5 @@ Open [http://localhost:3000](http://localhost:3000)
 ## Customizing Input Files
 Replace the example data in the project with your own in:
 ```bash
-src/components/file-list/filesData.js
+src/components/filesData.js
 ```
